@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Task, TaskStatus } from './task.entity';
-import {v4} from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class TasksService {
+  constructor(
+    @InjectRepository(Task) private taskRepository: Repository<Task>,
+  ) {}
+
   private tasks: Task[] = [
     {
       id: '1',
@@ -22,7 +28,8 @@ export class TasksService {
       description: description,
       status: TaskStatus.PENDING,
     };
-    this.tasks.push(task);
+    const newTask = this.taskRepository.create(task);
+    return this.taskRepository.save(newTask);
   }
   deleteTask(id: string) {
     this.tasks = this.tasks.filter((task) => task.id !== id);
