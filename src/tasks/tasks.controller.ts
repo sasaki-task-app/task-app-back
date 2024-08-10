@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto, UpdateTaskDto } from './dto/task.dto';
+import { Task } from "./task.entity";
 
 @Controller('tasks')
 export class TasksController {
@@ -17,6 +18,11 @@ export class TasksController {
   @Get()
   getAllTasks() {
     return this.taskService.getAllTasks();
+  }
+
+  @Get(':id')
+  getTaskById(@Param('id') id: string) {
+    return this.taskService.getTasksById(id);
   }
 
   @Post()

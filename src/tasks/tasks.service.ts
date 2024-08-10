@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from "@nestjs/common";
 import { Task, TaskStatus } from './task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 } from 'uuid';
+import { UpdateTaskDto } from "./dto/task.dto";
+import { HttpException } from "@nestjs/common";
 
 @Injectable()
 export class TasksService {
@@ -10,16 +12,8 @@ export class TasksService {
     @InjectRepository(Task) private taskRepository: Repository<Task>,
   ) {}
 
-  private tasks: Task[] = [
-    {
-      id: '1',
-      title: 'Do something',
-      description: 'Do something',
-      status: TaskStatus.PENDING,
-    },
-  ];
   getAllTasks() {
-    return this.tasks;
+    return this.taskRepository.find();
   }
   createTask(title: string, description: string) {
     const task: Task = {
@@ -31,17 +25,30 @@ export class TasksService {
     const newTask = this.taskRepository.create(task);
     return this.taskRepository.save(newTask);
   }
-  deleteTask(id: string) {
-    this.tasks = this.tasks.filter((task) => task.id !== id);
+
+  async deleteTask(id: string) {
+    const taskFound = await this.taskRepository.delete(id);
+    if (!taskFound) {
+      return new HttpException('Task not found', HttpStatus.NOT_FOUND);
+    }
+    return taskFound;
   }
 
-  getTasksById(id: string): Task {
-    return this.tasks.find((task) => task.id === id);
+  async getTasksById(id: string) {
+    const taskFound = await this.taskRepository.findOne({
+      where: { id },
+    });
+    if (!taskFound) {
+      return new HttpException('Task not found', HttpStatus.NOT_FOUND);
+    }
+    return taskFound;
   }
-  updateTask(id: string, updatedFields: any) {
-    const task = this.getTasksById(id);
-    const newTask = Object.assign(task, updatedFields);
-    this.tasks = this.tasks.map((task) => (task.id === id ? newTask : task));
-    return newTask;
+
+  async updateTask(id: string, updatedFields: UpdateTaskDto) {
+    const taskFound = await this.taskRepository.update(id, updatedFields);
+    if (!taskFound) {
+      return new HttpException('Task not found', HttpStatus.NOT_FOUND);
+    }
+    return taskFound;
   }
 }
