@@ -10,6 +10,10 @@ import {
 export class CreateTaskDto {
   @IsString()
   @IsNotEmpty()
+  id: string;
+
+  @IsString()
+  @IsNotEmpty()
   @MinLength(3)
   title: string;
 

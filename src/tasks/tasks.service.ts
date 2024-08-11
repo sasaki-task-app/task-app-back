@@ -15,9 +15,9 @@ export class TasksService {
   getAllTasks() {
     return this.taskRepository.find();
   }
-  createTask(title: string, description: string) {
+  createTask(id: string, title: string, description: string) {
     const task: Task = {
-      id: v4(),
+      id: id,
       title: title,
       description: description,
       status: TaskStatus.PENDING,
